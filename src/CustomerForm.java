@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
@@ -9,12 +10,16 @@ public class CustomerForm extends JFrame {
     JTextField txtSalary;
     JButton btnSave;
     JButton btnUpdate;
+    JButton btnDelete;
+    DefaultTableModel tableMoedel;
+    JTable customertable;
 
     CustomerForm() {
         setTitle("Customer Form");
         setSize(300, 400);
         setLayout(new BorderLayout());
         addInputs();
+        addTable();
 
         setVisible(true);
     }
@@ -29,7 +34,7 @@ public class CustomerForm extends JFrame {
         panel.add(txtId);
         panel.add(Box.createRigidArea(new Dimension(0, 10))); // space
 
-        txtId.addActionListener(e->{
+        txtId.addActionListener(e ->{
             filterAndSetCustomerDetails();
         });
 
@@ -66,8 +71,36 @@ public class CustomerForm extends JFrame {
             updateCustomer();
         });
 
+        btnDelete = new JButton("Delete Customer");
+        panel.add(btnDelete);
+        panel.add(Box.createRigidArea(new Dimension(0,10)));
 
-        add(panel, BorderLayout.CENTER);
+        btnDelete.addActionListener(e ->{
+            deleteCustomer();
+        });
+
+        add(panel, BorderLayout.NORTH);
+    }
+
+    private void addTable(){
+        String[] columns = {"ID", "Name", "Address", "Salary"};
+        tableMoedel = new DefaultTableModel(columns, 0);
+        customertable = new JTable(tableMoedel);
+        JScrollPane scrollPane = new JScrollPane(customertable);
+        add(scrollPane, BorderLayout.CENTER);
+    }
+
+
+
+    private void deleteCustomer(){
+        for (Customer tempCustomer : Database.customerTable){
+            if (txtId.getText().equals(tempCustomer.getId())){
+                Database.customerTable.remove(tempCustomer);
+                JOptionPane.showMessageDialog(this, "Customer deleted successfully");
+                clear();
+                return;
+            }
+        }
     }
 
     private void filterAndSetCustomerDetails() {
@@ -104,23 +137,11 @@ public class CustomerForm extends JFrame {
 
 
     private void updateCustomer() {
-        String customerId = txtId.getText();
-        String customerName = txtName.getText();
-        String customerAddress = txtAddress.getText();
-        double customerSalary = Double.parseDouble(txtSalary.getText());
-
-        Customer customer = new Customer(
-                customerId,
-                customerName,
-                customerAddress,
-                customerSalary
-        );
-
-        for (Customer tempCustomer: Database.customerTable){
-            if (customer.getId().equals(customerId)){
-                tempCustomer.setName(customerName);
-                tempCustomer.setAddress(customerAddress);
-                tempCustomer.setSalary(customerSalary);
+        for (Customer tempCustomer : Database.customerTable) {
+            if (txtId.getText().equals(tempCustomer.getId())) {
+                tempCustomer.setName(txtName.getText());
+                tempCustomer.setAddress(txtAddress.getText());
+                tempCustomer.setSalary(Double.parseDouble(txtSalary.getText()));
                 JOptionPane.showMessageDialog(this, "Customer Updated!");
                 clear();
                 return;
